@@ -1,0 +1,15 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name            = "abibool"
+version         = "0.0.0-git"
+authors         = ["MaulingMonkey <git@maulingmonkey.com>"]
+edition         = "2018"
+repository      = "https://github.com/MaulingMonkey/abibool"
+documentation   = "https://docs.rs/abibool"
+license         = "Apache-2.0 OR MIT"
+readme          = "Readme.md"
+description     = "C ABI compatible boolean types"
+keywords        = ["bool", "winapi"]
+categories      = ["development-tools::ffi"]
+exclude         = [".vscode"]
