@@ -13,3 +13,6 @@ description     = "C ABI compatible boolean types"
 keywords        = ["bool", "winapi"]
 categories      = ["development-tools::ffi"]
 exclude         = [".vscode"]
+
+[dependencies]
+bytemuck        = { version = "1", optional = true }

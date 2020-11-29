@@ -151,3 +151,12 @@ impl Ord for bool32 { fn cmp(&self, other: &bool32) -> Ordering { Ord::cmp(&bool
 
 impl Hash for bool8  { fn hash<H: Hasher>(&self, state: &mut H) { bool::from(*self).hash(state) } }
 impl Hash for bool32 { fn hash<H: Hasher>(&self, state: &mut H) { bool::from(*self).hash(state) } }
+
+#[cfg(feature = "bytemuck")] mod _bytemuck {
+    use super::*;
+
+    unsafe impl bytemuck::Pod for bool8  {}
+    unsafe impl bytemuck::Pod for bool32 {}
+    unsafe impl bytemuck::Zeroable for bool8  {}
+    unsafe impl bytemuck::Zeroable for bool32 {}
+}
