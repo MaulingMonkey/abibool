@@ -36,7 +36,7 @@ use std::ops::{Deref, DerefMut};
 /// `0` is `false`y, all other bit patterns are `true`thy.
 ///
 /// [BOOLEAN]:      https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types#BOOLEAN
-#[allow(non_camel_case_types)] // Okay, `bool32` is kind of a weird type name I agree... warranted in this case though IMO
+#[allow(non_camel_case_types)] // Okay, `bool8` is kind of a weird type name I agree... warranted in this case though IMO
 #[derive(Clone, Copy)]
 #[repr(transparent)] pub struct bool8(BOOLEAN);
 pub use bool8 as b8;
