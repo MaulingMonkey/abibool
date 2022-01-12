@@ -9,17 +9,34 @@
 
 For most sane rust APIs, you should prefer [bool] in your interfaces and simply convert between types.
 However, [bool] isn't legal for all bit patterns, making it unusable for most FFI without conversions.
-For simple FFI, this isn't a problem, but C APIs writing arrays of [BOOL] or [BOOLEAN], or structures containing
+For simple FFI, this isn't a problem, but C APIs writing arrays of
+[BOOL](https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types#BOOL) or
+[BOOLEAN](https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types#BOOLEAN),
+or structures containing
 these types, become problematic and require allocations and copies to avoid undefined behavior.  Alternatively, you
 *could* just use integer types, that can obfuscate intent and result in bugs if multiple truthy-but-different value
 are directly compared when you expect boolean logic.
 
-See [The Documentation](https://docs.rs/abibool) for details.
+## Type Map
 
-| abibool type      | winapi type   |
-| ----------------- | ------------- |
-| [b8] / [bool8]    | [BOOLEAN]     |
-| [b32] / [bool32]  | [BOOL]        |
+Note that this is *incredibly* system specific.
+E.g. BOOL for windows is 4 bytes, but for OS X it's 1 byte... probably.<br>
+When using abibool to write FFI crates, you may wish to [`cc`](https://docs.rs/cc/)
+a bunch of [`static_assert`](https://en.cppreference.com/w/cpp/language/static_assert)s
+in a build script to validate the size of your underlying C types.
+
+| C / C++ type                                                                                              | abibool type      | notes |
+| --------------------------------------------------------------------------------------------------------- | ----------------- | ----- |
+| `bool` (C++)                                                                                              | *varies*          | Often 1 byte, [but sometimes 4](https://github.com/OpenTTD/OpenTTD/commit/82f7140357b8b13e5f3c2eea715af936e5debb28) or worse
+| `_Bool` (C99 / stdbool.h)                                                                                 | *varies*          | Often 1 byte, [but sometimes 4](https://stackoverflow.com/a/10630231) or worse
+| [`BOOLEAN`](https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types#BOOLEAN) (Win32)    | [b8] / [bool8]    |
+| [`BOOL`](https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types#BOOL) (Win32)          | [b32] / [bool32]  |
+| [`BOOL`](https://opensource.apple.com/source/objc4/objc4-706/runtime/objc.h.auto.html) (OS X / objc.h)    | [b8] / [bool8] ?  | Typically `signed char`, but sometimes [bool](https://stackoverflow.com/a/544250) or [unsigned char](https://code.woboq.org/gcc/libobjc/objc/objc.h.html)
+| [`jboolean`](https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/types.html) (Java / JNI)     | [b8] / [bool8]    |
+
+## References
+
+*   [BOOL / bool / Boolean / NSCFBoolean](https://nshipster.com/bool/)          - Objective C truthy types
 
 
 
@@ -27,8 +44,8 @@ See [The Documentation](https://docs.rs/abibool) for details.
 
 Licensed under either of
 
-* Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-* MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+* Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0>)
+* MIT license ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
 
 at your option.
 
@@ -48,7 +65,4 @@ dual licensed as above, without any additional terms or conditions.
 [bool8]:            https://docs.rs/abibool/*/abibool/struct.bool8.html
 [b32]:              https://docs.rs/abibool/*/abibool/struct.bool32.html
 [bool32]:           https://docs.rs/abibool/*/abibool/struct.bool32.html
-
-[BOOL]:             https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types#BOOL
-[BOOLEAN]:          https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types#BOOLEAN
-[bytemuck::Pod]:    https://docs.rs/bytemuck/1.4/bytemuck/trait.Pod.html
+[winapi]:           https://docs.rs/winapi/
