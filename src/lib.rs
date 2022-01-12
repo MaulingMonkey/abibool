@@ -1,23 +1,4 @@
-//! # C ABI compatible boolean types
-//!
-//! For most sane rust APIs, you should prefer [bool] in your interfaces and simply convert between types.
-//! However, [bool] isn't legal for all bit patterns, making it unusable for most FFI without conversions.
-//! For simple FFI, this isn't a problem, but C APIs writing arrays of [BOOL] or [BOOLEAN], or structures containing
-//! these types, become problematic and require allocations and copies to avoid undefined behavior.  Alternatively, you
-//! *could* just use integer types, that can obfuscate intent and result in bugs if multiple truthy-but-different values
-//! are directly compared when you expect boolean logic.
-//!
-//! | abibool type      | winapi type   |
-//! | ----------------- | ------------- |
-//! | [b8] / [bool8]    | [BOOLEAN]     |
-//! | [b32] / [bool32]  | [BOOL]        |
-//!
-//! [BOOL]:             https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types#BOOL
-//! [BOOLEAN]:          https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types#BOOLEAN
-//! [bytemuck::Pod]:    https://docs.rs/bytemuck/1.4/bytemuck/trait.Pod.html
-
-use i32 as BOOL;    // use winapi::shared::minwindef::BOOL;
-use u8 as BOOLEAN;  // use winapi::shared::minwindef::BOOLEAN;
+#![doc = include_str!("../Readme.md")]
 
 use std::borrow::Borrow;
 use std::cmp::Ordering;
@@ -25,6 +6,10 @@ use std::fmt::{self, Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::ops::{Deref, DerefMut};
 
+// XXX: REMOVEME: Get rid of these defs in the next breaking revision of abibool.
+// They're too winapi specific.  See other "XXX: REMOVEME: " comments for thoughts.
+use i32 as BOOL;    // use winapi::shared::minwindef::BOOL;
+use u8 as BOOLEAN;  // use winapi::shared::minwindef::BOOLEAN;
 
 
 /// 8-bit boolean type that's ABI-compatible with Win32's [BOOLEAN].
@@ -89,9 +74,10 @@ impl Borrow<bool> for bool32 { fn borrow(&self) -> &bool { if bool::from(*self) 
 // "In particular Eq, Ord and Hash must be equivalent for borrowed and owned values" (https://doc.rust-lang.org/std/borrow/trait.Borrow.html)
 // We've gone to pains to make bool32 behave very much like bool, with `true` acting like a single value, even when the internal BOOL might be another truthy value like `-1`.
 
+// XXX: REMOVEME:  Too winapi specific, prone to misuse.  Main intent here is FFI interop.
+// Replace with `as_[mut_]_ptr` type constrained to matching-size integer types?
 impl Deref for bool8  { type Target = BOOLEAN; fn deref(&self) -> &Self::Target { &self.0 } }
 impl Deref for bool32 { type Target = BOOL;    fn deref(&self) -> &Self::Target { &self.0 } }
-
 impl DerefMut for bool8  { fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 } }
 impl DerefMut for bool32 { fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 } }
 
@@ -104,17 +90,17 @@ impl Display for bool32 { fn fmt(&self, f: &mut Formatter) -> fmt::Result { Disp
 
 impl From<bool   > for bool8   { fn from(value: bool   ) -> Self { Self(value as _) } }
 impl From<bool   > for bool32  { fn from(value: bool   ) -> Self { Self(value as _) } }
-impl From<BOOLEAN> for bool8   { fn from(value: BOOLEAN) -> Self { Self(value) } }
-impl From<BOOL   > for bool32  { fn from(value: BOOL   ) -> Self { Self(value) } }
-impl From<bool8  > for BOOLEAN { fn from(value: bool8  ) -> Self { value.0 } }
-impl From<bool32 > for BOOL    { fn from(value: bool32 ) -> Self { value.0 } }
+impl From<BOOLEAN> for bool8   { fn from(value: BOOLEAN) -> Self { Self(value) } } // XXX: REMOVEME: replace with `{u,i}8`?
+impl From<BOOL   > for bool32  { fn from(value: BOOL   ) -> Self { Self(value) } } // XXX: REMOVEME: replace with `{u,i}32`?
+impl From<bool8  > for BOOLEAN { fn from(value: bool8  ) -> Self { value.0 } } // XXX: REMOVEME: replace with `{u,i}8`?
+impl From<bool32 > for BOOL    { fn from(value: bool32 ) -> Self { value.0 } } // XXX: REMOVEME: replace with `{u,i}32`?
 impl From<bool8  > for bool    { fn from(value: bool8  ) -> Self { value.0 != 0 } }
 impl From<bool32 > for bool    { fn from(value: bool32 ) -> Self { value.0 != 0 } }
 
-impl From<&BOOLEAN> for &bool8   { fn from(value: &BOOLEAN) -> Self { unsafe { std::mem::transmute(value) } } }
-impl From<&BOOL   > for &bool32  { fn from(value: &BOOL   ) -> Self { unsafe { std::mem::transmute(value) } } }
-impl From<&bool8  > for &BOOLEAN { fn from(value: &bool8  ) -> Self { unsafe { std::mem::transmute(value) } } }
-impl From<&bool32 > for &BOOL    { fn from(value: &bool32 ) -> Self { unsafe { std::mem::transmute(value) } } }
+impl From<&BOOLEAN> for &bool8   { fn from(value: &BOOLEAN) -> Self { unsafe { std::mem::transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}8`?
+impl From<&BOOL   > for &bool32  { fn from(value: &BOOL   ) -> Self { unsafe { std::mem::transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}32`?
+impl From<&bool8  > for &BOOLEAN { fn from(value: &bool8  ) -> Self { unsafe { std::mem::transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}8`?
+impl From<&bool32 > for &BOOL    { fn from(value: &bool32 ) -> Self { unsafe { std::mem::transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}32`?
 
 // slices are always foreign, so we can't implement these - transmute yourself I guess
 // impl From<&[BOOLEAN]> for &[bool8  ] { fn from(value: &[BOOLEAN]) -> Self { unsafe { std::mem::transmute(value) } } }
