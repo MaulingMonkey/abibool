@@ -4,7 +4,7 @@ use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::fmt::{self, Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
-use std::ops::{Deref, DerefMut};
+use std::ops::{Deref, DerefMut, Not};
 
 // XXX: REMOVEME: Get rid of these defs in the next breaking revision of abibool.
 // They're too winapi specific.  See other "XXX: REMOVEME: " comments for thoughts.
@@ -109,6 +109,9 @@ impl From<&bool32 > for &BOOL    { fn from(value: &bool32 ) -> Self { unsafe { s
 // impl From<&[bool32 ]> for &[BOOL   ] { fn from(value: &[bool32 ]) -> Self { unsafe { std::mem::transmute(value) } } }
 
 // All comparisons, hashes, etc. are based on truthiness, not the underlying bit patterns!
+
+impl Not               for bool8  { type Output = bool; fn not(self) -> Self::Output { self.0 == 0 } }
+impl Not               for bool32 { type Output = bool; fn not(self) -> Self::Output { self.0 == 0 } }
 
 impl Eq                for bool8  {}
 impl Eq                for bool32 {}
