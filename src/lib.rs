@@ -1,10 +1,12 @@
 #![doc = include_str!("../Readme.md")]
+#![no_std]
 
-use std::borrow::Borrow;
-use std::cmp::Ordering;
-use std::fmt::{self, Debug, Display, Formatter};
-use std::hash::{Hash, Hasher};
-use std::ops::{Deref, DerefMut, Not};
+use core::borrow::Borrow;
+use core::cmp::Ordering;
+use core::fmt::{self, Debug, Display, Formatter};
+use core::hash::{Hash, Hasher};
+use core::mem::transmute;
+use core::ops::{Deref, DerefMut, Not};
 
 // XXX: REMOVEME: Get rid of these defs in the next breaking revision of abibool.
 // They're too winapi specific.  See other "XXX: REMOVEME: " comments for thoughts.
@@ -97,16 +99,16 @@ impl From<bool32 > for BOOL    { fn from(value: bool32 ) -> Self { value.0 } } /
 impl From<bool8  > for bool    { fn from(value: bool8  ) -> Self { value.0 != 0 } }
 impl From<bool32 > for bool    { fn from(value: bool32 ) -> Self { value.0 != 0 } }
 
-impl From<&BOOLEAN> for &bool8   { fn from(value: &BOOLEAN) -> Self { unsafe { std::mem::transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}8`?
-impl From<&BOOL   > for &bool32  { fn from(value: &BOOL   ) -> Self { unsafe { std::mem::transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}32`?
-impl From<&bool8  > for &BOOLEAN { fn from(value: &bool8  ) -> Self { unsafe { std::mem::transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}8`?
-impl From<&bool32 > for &BOOL    { fn from(value: &bool32 ) -> Self { unsafe { std::mem::transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}32`?
+impl From<&BOOLEAN> for &bool8   { fn from(value: &BOOLEAN) -> Self { unsafe { transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}8`?
+impl From<&BOOL   > for &bool32  { fn from(value: &BOOL   ) -> Self { unsafe { transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}32`?
+impl From<&bool8  > for &BOOLEAN { fn from(value: &bool8  ) -> Self { unsafe { transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}8`?
+impl From<&bool32 > for &BOOL    { fn from(value: &bool32 ) -> Self { unsafe { transmute(value) } } } // XXX: REMOVEME: replace with `{u,i}32`?
 
 // slices are always foreign, so we can't implement these - transmute yourself I guess
-// impl From<&[BOOLEAN]> for &[bool8  ] { fn from(value: &[BOOLEAN]) -> Self { unsafe { std::mem::transmute(value) } } }
-// impl From<&[BOOL   ]> for &[bool32 ] { fn from(value: &[BOOL   ]) -> Self { unsafe { std::mem::transmute(value) } } }
-// impl From<&[bool8  ]> for &[BOOLEAN] { fn from(value: &[bool8  ]) -> Self { unsafe { std::mem::transmute(value) } } }
-// impl From<&[bool32 ]> for &[BOOL   ] { fn from(value: &[bool32 ]) -> Self { unsafe { std::mem::transmute(value) } } }
+// impl From<&[BOOLEAN]> for &[bool8  ] { fn from(value: &[BOOLEAN]) -> Self { unsafe { transmute(value) } } }
+// impl From<&[BOOL   ]> for &[bool32 ] { fn from(value: &[BOOL   ]) -> Self { unsafe { transmute(value) } } }
+// impl From<&[bool8  ]> for &[BOOLEAN] { fn from(value: &[bool8  ]) -> Self { unsafe { transmute(value) } } }
+// impl From<&[bool32 ]> for &[BOOL   ] { fn from(value: &[bool32 ]) -> Self { unsafe { transmute(value) } } }
 
 // All comparisons, hashes, etc. are based on truthiness, not the underlying bit patterns!
 
