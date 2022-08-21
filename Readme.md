@@ -61,6 +61,7 @@ dual licensed as above, without any additional terms or conditions.
 
 <!-- references -->
 
+[bool]:             https://doc.rust-lang.org/core/primitive.bool.html
 [b8]:               https://docs.rs/abibool/*/abibool/struct.bool8.html
 [bool8]:            https://docs.rs/abibool/*/abibool/struct.bool8.html
 [b32]:              https://docs.rs/abibool/*/abibool/struct.bool32.html
